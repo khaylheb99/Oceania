@@ -1,0 +1,191 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sb
+
+df = pd.read_csv('C:\\Users\\KAY\\Documents\\Jupyter files\\Countries.csv')
+df
+
+#To have a full view of the table
+
+pd.set_option('display.max_column', 20)
+pd.set_option('display.max_row', 227)
+df
+
+#Cleaning up the data by renaming some columns and replacing some strings
+
+df.rename(columns= {'Arable (%)' : 'Arable Land (%)'}, inplace=True)
+
+
+df['Pop. Density (per sq. mi.)']= df['Pop. Density (per sq. mi.)'].str.replace(',', '.', case=False)
+df['Coastline (coast/area ratio)']= df['Coastline (coast/area ratio)'].str.replace(',', '.', case=False)
+df['Infant mortality (per 1000 births)']= df['Infant mortality (per 1000 births)'].str.replace(',', '.', case=False)
+df['Literacy (%)']= df['Literacy (%)'].str.replace(',', '.', case=False)
+df['Phones (per 1000)']= df['Phones (per 1000)'].str.replace(',', '.', case=False)
+df['Arable land (%)']= df['Arable land (%)'].str.replace(',', '.', case=False)
+df['Net migration']= df['Net migration'].str.replace(',', '.', case=False)
+df['Pop. Density (per sq. mi.)']= df['Pop. Density (per sq. mi.)'].str.replace(',', '.', case=False)
+df['Crops (%)']= df['Crops (%)'].str.replace(',', '.', case=False)
+df['Other (%)']= df['Other (%)'].str.replace(',', '.', case=False)
+df['Birthrate']= df['Birthrate'].str.replace(',', '.', case=False)
+df['Deathrate']= df['Deathrate'].str.replace(',', '.', case=False)
+df['Agriculture']= df['Agriculture'].str.replace(',', '.', case=False)
+df['Industry']= df['Industry'].str.replace(',', '.', case=False)
+df['Service']= df['Service'].str.replace(',', '.', case=False)
+df
+
+
+#Reassigning types to the numerical values on the columns so as to make them usable for statistical analysis if necessary
+
+df['Coastline (coast/area ratio)']= df['Coastline (coast/area ratio)'].astype(float)
+df['Infant mortality (per 1000 births)']= df['Infant mortality (per 1000 births)'].astype(float)
+df['Literacy (%)']= df['Literacy (%)'].astype(float)
+df['Phones (per 1000)']= df['Phones (per 1000)'].astype(float)
+df['Arable land (%)']= df['Arable land (%)'].astype(float)
+df['Net migration']= df['Net migration'].astype(float)
+df['Pop. Density (per sq. mi.)']= df['Pop. Density (per sq. mi.)'].astype(float)
+df['Crops (%)']= df['Crops (%)'].astype(float)
+df['Other (%)']= df['Other (%)'].astype(float)
+df['Birthrate']= df['Birthrate'].astype(float)
+df['Deathrate']= df['Deathrate'].astype(float)
+df['Agriculture']= df['Agriculture'].astype(float)
+df['Industry']= df['Industry'].astype(float)
+df['Service']= df['Service'].astype(float)
+
+#Regrouping regions 
+
+df['Region']=df['Region'].replace({'NEAR EAST                          ': 'MIDDLE EAST'})
+df['Region']=df['Region'].replace({'C.W. OF IND. STATES ': 'EUROPE'})
+df['Region']=df['Region'].replace({'ASIA (EX. NEAR EAST)         ' : 'MIDDLE EAST'})
+df['Region']=df['Region'].replace({'C.W. OF IND. STATES ': 'EASTERN EUROPE'})
+df['Region']=df['Region'].replace({'ASIA (EX. NEAR EAST)         ' : 'MIDDLE EAST'})
+df['Region']=df['Region'].replace({'NEAR EAST                          ' : 'MIDDLE EAST'})
+df['Region']=df['Region'].replace({'SUB-SAHARAN AFRICA                 ':'AFRICA'})
+df['Region']=df['Region'].replace({'NORTHERN AFRICA                    ':'AFRICA'})
+
+#Getting countries with a population greater than 50 million and showing only selected columns
+
+High_pop = 50000000
+High = df['Population']>High_pop
+df.loc[High, ['Country','Population','Area (sq. mi.)','GDP ($ per capita)','Industry','Agriculture']]
+
+# Getting the mean, median, maximum and minimum population figures
+
+df['Population'].mean()
+df['Population'].median()
+df['Population'].max()
+df['Population'].min()
+
+
+#Extracting the Oceanian countries and saving it in csv format
+
+Oceanian = (df['Region'] == 'OCEANIA                            ')
+Oceania= df.loc[Oceanian]
+Oceania
+
+Oceania.to_csv('C:\\Users\\KAY\\Documents\\Jupyter files\\Oceania.csv')
+
+#Reloading the Oceania table after reformatting to excel format
+
+Oceania_ = pd.read_excel('C:\\Users\\KAY\\Documents\\Jupyter files\\Oceania.xlsx')
+Oceania_
+
+#Plotting a graph about the arable land available
+
+Arable = Oceania_['Arable land (%)']
+Planting = Oceania_['Crops (%)']
+Name = Oceania_['Country']
+plt.style.use('seaborn-dark-palette')
+
+plt.barh(Name,Arable)
+plt.xlabel('Percentage of landmass arable')
+plt.ylabel('Countries')
+plt.title('Agro-potential')
+
+plt.tight_layout()
+# plt.legend()
+
+plt.show()
+
+#Plot comparing arable land to crop planting
+
+x_indexes= np.arange(len(Arable))
+width = 0.4
+plt.bar(x_indexes, Planting, color='g', width=width)
+plt.title('Arable land compared to areas used for planting')
+plt.xlabel('Country no.')
+plt.ylabel('% of arable land used')
+
+
+plt.bar(x_indexes+width, Agro, color = 'm',width=width)
+#The percentage of agricultural activities will be maroon 
+#while that of crops planted will be green.The agro-activities also involve animal farming amongst others
+
+plt.xticks(ticks=x_indexes)
+plt.tight_layout()
+
+plt.show()
+
+
+#Getting the top 5 crop planting per arable land 
+
+Top_agro = Oceania_.sort_values(by = ['Crops (%)'], ascending = False).head(5)
+
+
+#Stackplot comparing Agro-activities to utilization of land arable
+
+Agro_top = Top_agro['Agriculture']*100
+Arable_land_top = Top_agro['Arable land (%)']
+Top_planting = Top_agro['Crops (%)']
+Top_name = Top_agro['Country']
+
+plt.style.use('seaborn')
+
+
+Data_label = ['% Agro_activities','% crops palnted', '% of land arable']
+plt.stackplot(Top_name, Agro_top,Top_planting,Arable_land_top, labels=Data_label)
+
+plt.legend(loc = 'upper left')
+plt.title('Agro-efficiency')
+plt.tight_layout()
+plt.show()
+
+
+#Graph showing industrial activities in % of the crop planting nations 
+
+plt.style.use('seaborn')
+
+Industry=Top_agro['Industry']* 100
+plt.bar(Top_name,Industry, color = 'g')
+
+plt.title('Industrial output of Agro-inclined oceania members')
+plt.ylabel('% industrial output')
+
+plt.tight_layout()
+plt.show()
+
+
+#Top ten industrially active Oceania nations 
+
+Industrial = Oceania_.sort_values(by=['Industry'], ascending = False).head(10)
+Industrial
+
+
+#Oceanian countries with the highest GDPs and a graph showing how much involved they are in plantation agriculture
+
+
+Gdp = Oceania_.sort_values(by=['GDP ($ per capita)'], ascending = False).head(10)
+Gdp
+
+Gdp_name = Gdp['Country']
+Gdp_plant = Gdp['Crops (%)']
+
+plt.style.use('seaborn-dark-palette')
+plt.barh(Gdp_name,Gdp_plant, color='r', edgecolor = 'black')
+
+plt.title('% crops planted for the countries with the highest GDP')
+plt.ylabel('Country')
+plt.xlabel('% of arable land utilized')
+
+plt.tight_layout()
+plt.show()
+
